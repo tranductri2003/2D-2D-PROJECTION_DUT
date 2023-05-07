@@ -1,0 +1,123 @@
+
+<!-- saved from url=(0107)file:///D:/Code/Bach%20Khoa/Do%20Hoa%20May%20Tinh/BTL/2D%20points%20to%202D%20(ProjectionCalculator2d).html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>2D points to 2D (ProjectionCalculator2d)</title>
+    <script src="./2D points to 2D (ProjectionCalculator2d)_files/projection-3d-2d.min.js.download" type="text/javascript">
+    </script>
+  </head>
+
+  <body>
+    <div>
+      <div style="text-align: center; font-weight: 700; font-size: 2rem;">PROJECT 2D-2D</div>
+      <div style="text-align: center; margin: 20px;"><a href="https://github.com/Infl1ght/projection-3d-2d"></a>Đề tài 2D-2D cho phép chuyển đổi phối cảnh tọa độ từ mặt phẳng này sang mặt phẳng khác. Để thực hiện được phép biến đổi nêu trên, chúng ta cần chỉ định 4 điểm bên trong thực tế và tọa độ tương ứng của chúng trên màn hình. Trong đó không có 3 điểm nào thẳng hàng.</div>
+      
+      <canvas id="canvas" width="1000" height="625" style="margin: 12px auto; display: block;">Sorry, your browser does not support canvas :(</canvas>
+      <div style="text-align: center;">Di chuyển chuột trên hình ảnh khuôn viên trường đại học Bách khoa chúng ta sẽ thấy tọa độ tương ứng của nó ngoài thực tế!</div>
+    </div>
+    <script type="text/javascript">
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+
+      const points3d = [ // Coordinates of realife
+        [0, -5],
+        [-5, 0],
+        [0, 5],
+        [5, 0],
+      ]; 
+      const points2d = [ // Coordinates of the same points on screen
+        [484, 264],
+        [393, 336],
+        [484, 406],
+        [570, 332],
+      ];
+      var projectionCalculator2d = new Projection3d2d.ProjectionCalculator2d(points3d, points2d);
+      console.log(projectionCalculator2d);
+
+      var draw = () => {
+        drawBackground();
+        drawGrid();
+      }
+
+      var drawBackground = () => {
+        ctx.globalAlpha = 1;
+        if(image) {
+          ctx.drawImage(image, 0, 0, 1000, 625);
+        }
+      }
+
+      // var drawCircle = (mouseX, mouseY) => {
+      //   var point3d = projectionCalculator2d.getUnprojectedPoint([mouseX, mouseY]);
+      //   var polygonPoints = 10;
+      //   var circleRadius = 0.5;
+      //   ctx.beginPath();
+      //   ctx.strokeStyle = '#FFFFFF'
+      //   for (var i = 0; i <= polygonPoints; i++) {
+      //     var angle = i / polygonPoints * 2 * Math.PI;
+      //     var polygonPoint3dX = point3d[0] + circleRadius * Math.cos(angle);
+      //     var polygonPoint3dY = point3d[1] + circleRadius * Math.sin(angle);
+      //     var point2d = projectionCalculator2d.getProjectedPoint([polygonPoint3dX, polygonPoint3dY]);
+      //     ctx.lineTo(point2d[0], point2d[1]);
+      //   }
+      //   ctx.stroke();
+      // }
+
+      var drawGrid = (step = 5, mouseX = undefined, mouseY = undefined) => {
+        ctx.strokeStyle = '#FFFFFF'
+        
+        if (mouseX && mouseY) {
+          const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 65);
+          grad.addColorStop(0, '#FFFFFF');
+          grad.addColorStop(1, 'transparent');
+          ctx.strokeStyle = grad;
+          ctx.globalAlpha = 0.5;
+        } else {
+          ctx.globalAlpha = 0.2;
+        }
+        ctx.beginPath();
+        for (var x = 0; x <= 105; x += step) {
+          var point2d_1 = projectionCalculator2d.getProjectedPoint([x, -13]);
+          var point2d_2 = projectionCalculator2d.getProjectedPoint([x, 55]);
+          ctx.moveTo(point2d_1[0], point2d_1[1]);
+          ctx.lineTo(point2d_2[0], point2d_2[1]);
+        }
+        for (var y = -13; y <= 55; y += step) {
+          var point2d_1 = projectionCalculator2d.getProjectedPoint([0, y]);
+          var point2d_2 = projectionCalculator2d.getProjectedPoint([105, y]);
+          ctx.moveTo(point2d_1[0], point2d_1[1]);
+          ctx.lineTo(point2d_2[0], point2d_2[1]);
+        }
+        ctx.stroke();
+      }
+
+      var drawCoordinates = (mouseX, mouseY) => {
+        var point3d = projectionCalculator2d.getUnprojectedPoint([mouseX, mouseY]);
+        var x3d = Math.round(point3d[0] * 10) / 10;
+        var y3d = Math.round(point3d[1] * 10) / 10;
+        var text = 'X: ' + x3d + ' m., Y: ' + y3d + ' m.';
+        ctx.globalAlpha = 1;
+        ctx.font = '21px Arial';
+        ctx.strokeStyle = 'black';
+        ctx.strokeText(text, mouseX + 2, mouseY - 2);
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, mouseX + 2, mouseY - 2);
+      }
+
+      let image = new Image();
+      image.src = './DUT.jpg';
+      image.onload = () => {
+        draw();
+      }
+      
+      canvas.onmousemove = (evt) => {
+        var mouseX = evt.offsetX;
+        var mouseY = evt.offsetY;
+        draw();
+        drawGrid(1, mouseX, mouseY);
+        drawCoordinates(mouseX, mouseY);
+      }
+    </script>
+  
+</body></html>
